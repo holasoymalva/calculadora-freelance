@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Tarifas para Desarrolladores Freelance</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .emoji-icon { 
+            font-size: 1.2rem; 
+            display: inline-block; 
+            margin-right: 0.5rem;
+        }
+        .footer-link {
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        .footer-link:hover {
+            color: #4f46e5;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // Iconos usando emojis
+        const Calculator = () => <span className="emoji-icon">🧮</span>;
+        const DollarSign = () => <span className="emoji-icon">💰</span>;
+        const Code = () => <span className="emoji-icon">💻</span>;
+        const Clock = () => <span className="emoji-icon">⏰</span>;
+        const MapPin = () => <span className="emoji-icon">📍</span>;
+        const Users = () => <span className="emoji-icon">👥</span>;
+        const Zap = () => <span className="emoji-icon">⚡</span>;
+        const Star = () => <span className="emoji-icon">⭐</span>;
+
+        const FreelancePricingCalculator = () => {
+            const [formData, setFormData] = React.useState({
+                experience: '',
+                projectType: '',
+                complexity: '',
+                technologies: [],
+                timeline: '',
+                clientType: '',
+                location: '',
+                includesDesign: false,
+                includesMaintenance: false,
+                projectDuration: ''
+            });
+
+            const [pricing, setPricing] = React.useState({ min: 0, max: 0, recommended: 0 });
+
+            // Datos de configuración
+            const experienceLevels = [
+                { value: 'junior', label: 'Junior (0-2 años)', multiplier: 1 },
+                { value: 'mid', label: 'Mid-level (2-5 años)', multiplier: 1.5 },
+                { value: 'senior', label: 'Senior (5+ años)', multiplier: 2.2 },
+                { value: 'expert', label: 'Expert (10+ años)', multiplier: 3 }
+            ];
+
+            const projectTypes = [
+                { value: 'landing', label: 'Landing Page', basePrice: 500, complexity: 1 },
+                { value: 'website', label: 'Sitio Web Corporativo', basePrice: 1200, complexity: 1.3 },
+                { value: 'ecommerce', label: 'E-commerce', basePrice: 2500, complexity: 2 },
+                { value: 'webapp', label: 'Aplicación Web', basePrice: 3500, complexity: 2.5 },
+                { value: 'mobile', label: 'App Mobile', basePrice: 4000, complexity: 2.8 },
+                { value: 'custom', label: 'Sistema Personalizado', basePrice: 5000, complexity: 3.2 }
+            ];
+
+            const complexityLevels = [
+                { value: 'basic', label: 'Básico', multiplier: 1 },
+                { value: 'intermediate', label: 'Intermedio', multiplier: 1.4 },
+                { value: 'advanced', label: 'Avanzado', multiplier: 1.8 },
+                { value: 'enterprise', label: 'Empresarial', multiplier: 2.3 }
+            ];
+
+            const technologiesOptions = [
+                { value: 'html-css', label: 'HTML/CSS', multiplier: 1 },
+                { value: 'javascript', label: 'JavaScript', multiplier: 1.1 },
+                { value: 'react', label: 'React', multiplier: 1.3 },
+                { value: 'vue', label: 'Vue.js', multiplier: 1.25 },
+                { value: 'angular', label: 'Angular', multiplier: 1.35 },
+                { value: 'nodejs', label: 'Node.js', multiplier: 1.4 },
+                { value: 'python', label: 'Python', multiplier: 1.35 },
+                { value: 'database', label: 'Base de Datos', multiplier: 1.2 },
+                { value: 'api', label: 'APIs/Integración', multiplier: 1.3 },
+                { value: 'ai-ml', label: 'IA/Machine Learning', multiplier: 2 }
+            ];
+
+            const timelines = [
+                { value: 'flexible', label: 'Flexible (2+ meses)', multiplier: 1 },
+                { value: 'normal', label: 'Normal (1-2 meses)', multiplier: 1.1 },
+                { value: 'urgent', label: 'Urgente (2-4 semanas)', multiplier: 1.4 },
+                { value: 'rush', label: 'Rush (1-2 semanas)', multiplier: 1.8 }
+            ];
+
+            const clientTypes = [
+                { value: 'individual', label: 'Cliente Individual', multiplier: 1 },
+                { value: 'startup', label: 'Startup', multiplier: 1.1 },
+                { value: 'small-business', label: 'Pequeña Empresa', multiplier: 1.3 },
+                { value: 'medium-business', label: 'Empresa Mediana', multiplier: 1.6 },
+                { value: 'enterprise', label: 'Gran Empresa', multiplier: 2.2 }
+            ];
+
+            const locations = [
+                { value: 'latam', label: 'Latinoamérica', multiplier: 1 },
+                { value: 'spain', label: 'España', multiplier: 1.5 },
+                { value: 'usa', label: 'Estados Unidos', multiplier: 2.5 },
+                { value: 'europe', label: 'Europa Occidental', multiplier: 2 },
+                { value: 'canada', label: 'Canadá', multiplier: 2.2 }
+            ];
+
+            const durations = [
+                { value: 'one-time', label: 'Proyecto único', multiplier: 1 },
+                { value: 'short', label: 'Corto plazo (1-3 meses)', multiplier: 0.95 },
+                { value: 'medium', label: 'Mediano plazo (3-6 meses)', multiplier: 0.9 },
+                { value: 'long', label: 'Largo plazo (6+ meses)', multiplier: 0.85 }
+            ];
+
+            // Función para calcular el precio
+            const calculatePricing = () => {
+                if (!formData.experience || !formData.projectType || !formData.complexity) {
+                    setPricing({ min: 0, max: 0, recommended: 0 });
+                    return;
+                }
+
+                const experienceData = experienceLevels.find(e => e.value === formData.experience);
+                const projectData = projectTypes.find(p => p.value === formData.projectType);
+                const complexityData = complexityLevels.find(c => c.value === formData.complexity);
+                const timelineData = timelines.find(t => t.value === formData.timeline) || { multiplier: 1 };
+                const clientData = clientTypes.find(c => c.value === formData.clientType) || { multiplier: 1 };
+                const locationData = locations.find(l => l.value === formData.location) || { multiplier: 1 };
+                const durationData = durations.find(d => d.value === formData.projectDuration) || { multiplier: 1 };
+
+                // Calcular multiplicador de tecnologías
+                let techMultiplier = 1;
+                if (formData.technologies.length > 0) {
+                    const techValues = formData.technologies.map(tech => 
+                        technologiesOptions.find(t => t.value === tech)?.multiplier || 1
+                    );
+                    techMultiplier = Math.max(...techValues) + (techValues.length - 1) * 0.1;
+                }
+
+                // Precio base
+                let basePrice = projectData.basePrice;
+                
+                // Aplicar todos los multiplicadores
+                basePrice *= experienceData.multiplier;
+                basePrice *= complexityData.multiplier;
+                basePrice *= techMultiplier;
+                basePrice *= timelineData.multiplier;
+                basePrice *= clientData.multiplier;
+                basePrice *= locationData.multiplier;
+                basePrice *= durationData.multiplier;
+
+                // Agregar extras
+                if (formData.includesDesign) {
+                    basePrice *= 1.3;
+                }
+                if (formData.includesMaintenance) {
+                    basePrice *= 1.2;
+                }
+
+                // Calcular rango
+                const min = Math.round(basePrice * 0.8);
+                const max = Math.round(basePrice * 1.3);
+                const recommended = Math.round(basePrice);
+
+                setPricing({ min, max, recommended });
+            };
+
+            React.useEffect(() => {
+                calculatePricing();
+            }, [formData]);
+
+            const handleInputChange = (field, value) => {
+                setFormData(prev => ({
+                    ...prev,
+                    [field]: value
+                }));
+            };
+
+            const handleTechnologyChange = (tech) => {
+                setFormData(prev => ({
+                    ...prev,
+                    technologies: prev.technologies.includes(tech)
+                        ? prev.technologies.filter(t => t !== tech)
+                        : [...prev.technologies, tech]
+                }));
+            };
+
+            const formatPrice = (price) => {
+                return new Intl.NumberFormat('es-MX', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(price);
+            };
+
+            const isFormValid = () => {
+                return formData.experience && formData.projectType && formData.complexity;
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+                    <div className="max-w-6xl mx-auto">
+                        {/* Header */}
+                        <div className="text-center mb-8">
+                            <div className="flex items-center justify-center mb-4">
+                                <Calculator />
+                                <h1 className="text-3xl font-bold text-gray-800">
+                                    Calculadora de Tarifas Freelance
+                                </h1>
+                            </div>
+                            <p className="text-gray-600 max-w-2xl mx-auto">
+                                Obtén una estimación personalizada de cuánto deberías cobrar por tus servicios como desarrollador freelance
+                            </p>
+                        </div>
+
+                        <div className="grid lg:grid-cols-3 gap-8">
+                            {/* Formulario */}
+                            <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    
+                                    {/* Experiencia */}
+                                    <div>
+                                        <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                                            <Code />
+                                            Nivel de Experiencia *
+                                        </label>
+                                        <select
+                                            value={formData.experience}
+                                            onChange={(e) => handleInputChange('experience', e.target.value)}
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                        >
+                                            <option value="">Selecciona tu nivel</option>
+                                            {experienceLevels.map(level => (
+                                                <option key={level.value} value={level.value}>
+                                                    {level.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* Tipo de Proyecto */}
+                                    <div>
+                                        <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                                            <Zap />
+                                            Tipo de Proyecto *
+                                        </label>
+                                        <select
+                                            value={formData.projectType}
+                                            onChange={(e) => handleInputChange('projectType', e.target.value)}
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                        >
+                                            <option value="">Selecciona el tipo</option>
+                                            {projectTypes.map(type => (
+                                                <option key={type.value} value={type.value}>
+                                                    {type.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* Complejidad */}
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-700 mb-3 block">
+                                            <Star />
+                                            Complejidad del Proyecto *
+                                        </label>
+                                        <select
+                                            value={formData.complexity}
+                                            onChange={(e) => handleInputChange('complexity', e.target.value)}
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                        >
+                                            <option value="">Selecciona complejidad</option>
+                                            {complexityLevels.map(level => (
+                                                <option key={level.value} value={level.value}>
+                                                    {level.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* Timeline */}
+                                    <div>
+                                        <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                                            <Clock />
+                                            Urgencia del Proyecto
+                                        </label>
+                                        <select
+                                            value={formData.timeline}
+                                            onChange={(e) => handleInputChange('timeline', e.target.value)}
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                        >
+                                            <option value="">Selecciona timeline</option>
+                                            {timelines.map(timeline => (
+                                                <option key={timeline.value} value={timeline.value}>
+                                                    {timeline.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* Tipo de Cliente */}
+                                    <div>
+                                        <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                                            <Users />
+                                            Tipo de Cliente
+                                        </label>
+                                        <select
+                                            value={formData.clientType}
+                                            onChange={(e) => handleInputChange('clientType', e.target.value)}
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                        >
+                                            <option value="">Selecciona tipo de cliente</option>
+                                            {clientTypes.map(client => (
+                                                <option key={client.value} value={client.value}>
+                                                    {client.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* Ubicación */}
+                                    <div>
+                                        <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                                            <MapPin />
+                                            Mercado Objetivo
+                                        </label>
+                                        <select
+                                            value={formData.location}
+                                            onChange={(e) => handleInputChange('location', e.target.value)}
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                        >
+                                            <option value="">Selecciona mercado</option>
+                                            {locations.map(location => (
+                                                <option key={location.value} value={location.value}>
+                                                    {location.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* Duración */}
+                                    <div className="md:col-span-2">
+                                        <label className="text-sm font-medium text-gray-700 mb-3 block">
+                                            📅 Duración del Compromiso
+                                        </label>
+                                        <select
+                                            value={formData.projectDuration}
+                                            onChange={(e) => handleInputChange('projectDuration', e.target.value)}
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                        >
+                                            <option value="">Selecciona duración</option>
+                                            {durations.map(duration => (
+                                                <option key={duration.value} value={duration.value}>
+                                                    {duration.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* Tecnologías */}
+                                    <div className="md:col-span-2">
+                                        <label className="text-sm font-medium text-gray-700 mb-3 block">
+                                            🔧 Tecnologías Requeridas (selecciona todas las que apliquen)
+                                        </label>
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                            {technologiesOptions.map(tech => (
+                                                <label key={tech.value} className="flex items-center p-2 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={formData.technologies.includes(tech.value)}
+                                                        onChange={() => handleTechnologyChange(tech.value)}
+                                                        className="mr-2 text-indigo-600 focus:ring-indigo-500 rounded"
+                                                    />
+                                                    <span className="text-sm text-gray-700">{tech.label}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Extras */}
+                                    <div className="md:col-span-2">
+                                        <label className="text-sm font-medium text-gray-700 mb-3 block">
+                                            ✨ Servicios Adicionales
+                                        </label>
+                                        <div className="space-y-2">
+                                            <label className="flex items-center p-2 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.includesDesign}
+                                                    onChange={(e) => handleInputChange('includesDesign', e.target.checked)}
+                                                    className="mr-2 text-indigo-600 focus:ring-indigo-500 rounded"
+                                                />
+                                                <span className="text-sm text-gray-700">🎨 Incluye diseño UI/UX (+30%)</span>
+                                            </label>
+                                            <label className="flex items-center p-2 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.includesMaintenance}
+                                                    onChange={(e) => handleInputChange('includesMaintenance', e.target.checked)}
+                                                    className="mr-2 text-indigo-600 focus:ring-indigo-500 rounded"
+                                                />
+                                                <span className="text-sm text-gray-700">🔧 Incluye mantenimiento 6 meses (+20%)</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Resultados */}
+                            <div className="bg-white rounded-xl shadow-lg p-6 sticky top-4">
+                                <div className="text-center mb-6">
+                                    <DollarSign />
+                                    <h3 className="text-xl font-bold text-gray-800 mb-2">
+                                        Estimación de Precio
+                                    </h3>
+                                </div>
+
+                                {pricing.recommended > 0 && isFormValid() ? (
+                                    <div className="space-y-4">
+                                        <div className="bg-green-50 rounded-lg p-4 text-center border border-green-200">
+                                            <p className="text-sm text-green-600 font-medium mb-1">
+                                                🎯 Precio Recomendado
+                                            </p>
+                                            <p className="text-3xl font-bold text-green-700">
+                                                {formatPrice(pricing.recommended)}
+                                            </p>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="bg-blue-50 rounded-lg p-3 text-center border border-blue-200">
+                                                <p className="text-xs text-blue-600 font-medium mb-1">
+                                                    💙 Precio Mínimo
+                                                </p>
+                                                <p className="text-lg font-bold text-blue-700">
+                                                    {formatPrice(pricing.min)}
+                                                </p>
+                                            </div>
+                                            <div className="bg-purple-50 rounded-lg p-3 text-center border border-purple-200">
+                                                <p className="text-xs text-purple-600 font-medium mb-1">
+                                                    💜 Precio Premium
+                                                </p>
+                                                <p className="text-lg font-bold text-purple-700">
+                                                    {formatPrice(pricing.max)}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                            <h4 className="font-semibold text-gray-800 mb-2">💡 Consejos:</h4>
+                                            <ul className="text-sm text-gray-600 space-y-1">
+                                                <li>• Usa el precio mínimo para clientes recurrentes</li>
+                                                <li>• El precio recomendado es tu punto de partida</li>
+                                                <li>• El precio premium es para proyectos especiales</li>
+                                                <li>• Siempre considera el valor que aportas</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8">
+                                        <p className="text-gray-500 mb-4">
+                                            Completa los campos básicos para ver tu estimación de precio
+                                        </p>
+                                        <div className="mt-4 text-sm text-gray-400">
+                                            <p className="font-medium mb-2">📋 Campos requeridos:</p>
+                                            <ul className="space-y-1">
+                                                <li className={formData.experience ? 'text-green-600 line-through' : ''}>
+                                                    • Nivel de experiencia
+                                                </li>
+                                                <li className={formData.projectType ? 'text-green-600 line-through' : ''}>
+                                                    • Tipo de proyecto
+                                                </li>
+                                                <li className={formData.complexity ? 'text-green-600 line-through' : ''}>
+                                                    • Complejidad
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="mt-12 text-center">
+                            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+                                <p className="text-sm text-gray-500 mb-4">
+                                    💡 Esta herramienta proporciona estimaciones basadas en factores del mercado internacional.
+                                    <br />
+                                    Ajusta los precios según tu experiencia específica y valor único.
+                                </p>
+                            </div>
+                            
+                            {/* Créditos */}
+                            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl p-4">
+                                <p className="text-sm">
+                                    🚀 Desarrollado con ❤️ por{' '}
+                                    <a 
+                                        href="https://github.com/holasoymalva" 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="footer-link text-yellow-300 hover:text-yellow-200"
+                                    >
+                                        @holasoymalva
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Renderizar la aplicación
+        ReactDOM.render(<FreelancePricingCalculator />, document.getElementById('root'));
+    </script>
+</body>
+</html>
