@@ -141,8 +141,7 @@ calculadora-tarifas-freelance/
 │
 ├── calculadora-freelance.html    # Aplicación completa
 ├── README.md                     # Este archivo
-├── LICENSE                       # Licencia del proyecto
-└── assets/                       # (Opcional) Screenshots, demos
+└── LICENSE                       # Licencia del proyecto
 ```
 
 ## ⚠️ Disclaimer
